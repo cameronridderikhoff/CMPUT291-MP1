@@ -150,17 +150,17 @@ class agent_queries:
         while (fname == "" or lname == "" 
         and re.match("^[-A-Za-z0-9]*$", fname) and re.match("^[-A-Za-z0-9]*$", lname)):
             print('You can only use letters or, numbers, and you cannot leave the first or last name blank.')
-            fname = input("Please enter the %s's first name: " % type_of)
-            lname = input("Please enter the %s's last name: " % type_of)
+            fname = input("Please enter %s first name: " % type_of)
+            lname = input("Please enter %s last name: " % type_of)
 
         #dont need to regex check bdate since the get_valid_date() method does this already
-        print("Please enter the %s's birthdate: " % type_of)
+        print("Please enter %s birthdate: " % type_of)
         bdate = self.get_valid_date()
         regex_check = False
         while not regex_check:
-            bplace = input("Please enter the %s's birthplace: " % type_of)
-            address = input("Please enter the %s's address: " % type_of)
-            phone = input("Please enter the %s's phone number: " % type_of)
+            bplace = input("Please enter %s birthplace: " % type_of)
+            address = input("Please enter %s address: " % type_of)
+            phone = input("Please enter %s phone number: " % type_of)
             if (re.match("^[A-Za-z0-9_]*$", bplace)
             and  re.match("^[A-Za-z0-9_]*$", address) and re.match("^[A-Za-z0-9_]*$", phone)):
                 regex_check = True
