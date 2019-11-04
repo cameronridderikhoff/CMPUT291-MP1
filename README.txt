@@ -2,7 +2,8 @@ Cameron Ridderikhoff - ridder
 Warren Stix - wstix
 Yuhang Ma - yuhang5
 
-We did not collaborate with anyone else.
+Collaboration:
+Jacques Leong-Sit (Used his test data that was uploaded to the eclass forum)
 
 Sources:
 stackoverflow.com
