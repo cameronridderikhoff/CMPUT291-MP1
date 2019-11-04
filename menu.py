@@ -139,7 +139,7 @@ class menu:
                     if choice.lower() == "e":
                         sys.exit()
                     elif choice.lower()=="b":
-                        self.a_menu()
+                        self.main_menu()
                         return
                     elif choice.lower()=="o":
                         self.o_login() 
