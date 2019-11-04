@@ -150,17 +150,17 @@ class agent_queries:
         while (fname == "" or lname == "" 
         and re.match("^[-A-Za-z0-9]*$", fname) and re.match("^[-A-Za-z0-9]*$", lname)):
             print('You can only use letters or, numbers, and you cannot leave the first or last name blank.')
-            fname = input("Please enter %s first name: " % type_of)
-            lname = input("Please enter %s last name: " % type_of)
+            fname = input("Please enter the %s's first name: " % type_of)
+            lname = input("Please enter the %s's last name: " % type_of)
 
         #dont need to regex check bdate since the get_valid_date() method does this already
-        print("Please enter %s birthdate: " % type_of)
+        print("Please enter the %s's birthdate: " % type_of)
         bdate = self.get_valid_date()
         regex_check = False
         while not regex_check:
-            bplace = input("Please enter %s birthplace: " % type_of)
-            address = input("Please enter %s address: " % type_of)
-            phone = input("Please enter %s phone number: " % type_of)
+            bplace = input("Please enter the %s's birthplace: " % type_of)
+            address = input("Please enter the %s's address: " % type_of)
+            phone = input("Please enter the %s's phone number: " % type_of)
             if (re.match("^[A-Za-z0-9_]*$", bplace)
             and  re.match("^[A-Za-z0-9_]*$", address) and re.match("^[A-Za-z0-9_]*$", phone)):
                 regex_check = True
@@ -475,9 +475,9 @@ class agent_queries:
         cursor.execute(" SELECT fname,lname FROM registrations  Where fname= ?  COLLATE NOCASE AND  lname= ? COLLATE NOCASE;",[(fname),(lname)])
         results = cursor.fetchall()
         if  len(results)==0 : 
-            t=input('No fname matched please enter "e" to exit or enter others to try again  :')
+            t=input('No fname matched please enter "e" to go back to the agent menu or enter others to try again  :')
             if t.lower() == "e":
-                sys.exit()
+                return
             else:
                 self.get_driver_abstract(cursor)           
             
@@ -516,6 +516,7 @@ class agent_queries:
                     return
                 elif option.lower()=="t":
                     self.get_driver_abstract(cursor)
+                    return
                 elif option.lower()=="y":
                     if number_tickets==0:
                         while True:
@@ -538,7 +539,7 @@ class agent_queries:
                         while True:
                             x=input('Enter "a" to view all tickets, or enter "e" will go back to the agent menu, or enter "t" to view another driver abstract:')
                             if x.lower()=="e":
-                                return 
+                                self.agent_menu
                             elif x.lower()=="t":
                                 self.get_driver_abstract(cursor)
                             elif x.lower()=="a":

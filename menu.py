@@ -44,7 +44,7 @@ class menu:
                 self.o_login()  
                 return
             elif Type.lower() == "s":
-                self.register_user() 
+                self.register_user()
             elif Type.lower() == "e":
                 sys.exit()
             else:
@@ -170,11 +170,11 @@ class menu:
                  ffname, flname, mfname, mlname)
                 if result == "m":
                     print("Birth could not be registered, mother does not exist. ")
-                    mdetails = query.regex_person_details("the mother's", mfname, mlname)
+                    mdetails = query.regex_person_details("mother", mfname, mlname)
                     self.cursor.execute("INSERT INTO persons VALUES (?, ?, ?, ?, ?, ?)", (mdetails))
                 elif result == "f":
                     print("Birth could not be registered, father does not exist. Would you like to add him?")
-                    fdetails = query.regex_person_details("the father's", ffname, flname)
+                    fdetails = query.regex_person_details("father", ffname, flname)
                     self.cursor.execute("INSERT INTO persons VALUES (?, ?, ?, ?, ?, ?)", (fdetails))
                 elif result == "u":
                     raise(Exception, "USER IS INVALID")
@@ -192,11 +192,11 @@ class menu:
                 result = query.register_marriage(self.cursor, self.uid, p1fname, p1lname, p2fname, p2lname)
                 if result == "1":
                     print("Birth could not be registered, the first person does not exist. ")
-                    p1details = query.regex_person_details("the first person's", p1fname, p1lname)
+                    p1details = query.regex_person_details("first person", p1fname, p1lname)
                     self.cursor.execute("INSERT INTO persons VALUES (?, ?, ?, ?, ?, ?)", (p1details))
                 elif result == "2":
                     print("Birth could not be registered, the second person does not exist. ")
-                    p2details = query.regex_person_details("the second person's", p1fname, p1lname)
+                    p2details = query.regex_person_details("second person", p1fname, p1lname)
                     self.cursor.execute("INSERT INTO persons VALUES (?, ?, ?, ?, ?, ?)", (p2details))
                 elif result == "u":
                     raise(Exception, "USER IS INVALID")
@@ -271,38 +271,46 @@ class menu:
     # Users will be asked to enter the personal information like the type,name, city.
     # Then the system will inster the new uid and password with the personal information into the users table.
     def register_user(self):
-        create_uid= False
-        while create_uid== False:
+        creat_uid= False
+        while creat_uid== False:
             uid = input("Please enter a new uid: ")
             if re.match("^[A-Za-z0-9_]*$", uid):
                 self.cursor.execute("SELECT uid FROM users WHERE uid = ? COLLATE NOCASE;", [(uid)])
                 if self.cursor.fetchall():
                     print("This uid exists. Try another")
                 else:
-                    create_uid= True
+                    creat_uid= True
             else:
-                print('You can just use letters, numbers or the symbol " _ ", please try again')
+                print('You can only use letters, numbers or the symbol " _ ", please try again')
 
         while True:
-            pwd = getpass.getpass("please enter your password: ")
+            pwd = getpass.getpass("Please enter your password: ")
             if re.match("^[A-Za-z0-9_]*$", pwd):
-                utype=input("Type  'a' for agents, Type 'o' for officers:")
+                while True:
+                    utype=input("Type  'a' for agents, Type 'o' for officers:")
+                    if utype.lower() == "a" or utype.lower() == "o":
+                        break
+                    else:
+                        print("You can just Type  'a' for agents, Type 'o' for officers")
+                        
                 fname = input("Please enter your first name: ")
                 lname = input("Please enter your last name: ")
                 city = input("Please enter your city: ")
                 data = (uid,pwd,utype,fname,lname,city)
-                self.cursor.execute("SELECT * FROM persons WHERE LOWER(fname) = ?  AND LOWER(lname) = ? COLLATE NOCASE;", (fname, lname))
-                if (not self.cursor.fetchall()):
-                    query = aq.agent_queries(self.cursor)
-                    userdetails = query.regex_person_details("your", fname, lname)
-                    self.cursor.execute("INSERT INTO persons VALUES (?, ?, ?, ?, ?, ?);", userdetails)
+                self.cursor.execute("SELECT * FROM persons where LOWER(fname)=? and LOWER(lname)=? COLLATE NOCASE;",(fname,lname))
+                if(not self.cursor.fetchall()):
+                    query=aq.agent_queries(self.cursor)
+                    userdetails=query.regex_person_details("your",fname,lname)
+                    self.cursor.execute("INSERT INTO  persons VALUES (?,?,?,?,?,?);",userdetails)
                 self.cursor.execute("INSERT INTO  users VALUES (?,?,?,?,?,?);",data)
                 break
             else:
-                print('You can just use letters, numbers or symbo " _ ",please try again')
+                print('You can only use letters, numbers or the symbol " _ ", please try again')
         self.connection.commit()
         print("Sign up successfully")
         print("\n\n\n")
+        self.main_menu()
+    
     
 
 if __name__ == "__main__":
