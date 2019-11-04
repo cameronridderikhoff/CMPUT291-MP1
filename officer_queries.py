@@ -50,11 +50,11 @@ class officer_queries:
             while True:
                 #fin will be integer
                 #Fin and violation will not be null
-                fine_amount=input('Provding a fine amount:')
-                if not re.match("^[0-9_]*$", fine_amount):
+                fine_amount=input('Provide a fine amount $')
+                if not re.match("^[0-9]*$", fine_amount):
                     print("The amount should be an integer")
                 elif fine_amount=="":
-                    print("The amount could not be an null")
+                    print("The amount cannot be blank")
                 else:
                     while True:
                         violation=input('Providing a a violation text :')
@@ -136,9 +136,11 @@ class officer_queries:
                         % (i + 1, results[i][0], results[i][1], results[i][2],
                             results[i][3], results[i][4]))
 
+        if len(results) == 0:
+            outputs.append("There are no vehicles with those specifications.")
         # If there are less than four results, add the owner to each vehicle's
         # display
-        if len(results) < 4:
+        if len(results) < 4 and len(results) > 0:
             for j in range(len(outputs)):
                 if results[j][4] is not None:
                     outputs[j] += ', Owner: %s %s' % (results[j][5], results[j][6])
@@ -149,7 +151,7 @@ class officer_queries:
         
         if len(results) >= 4:
             while True:
-                selection = input('Select a vehicle: ')
+                selection = input('Select a vehicle, or type "e" to exit: ')
                 if selection == 'e':
                     return
                 elif not selection.isdigit():

@@ -18,7 +18,6 @@ class menu:
     def main(self):    
         print("*************************")
         print("Welcome Mini project 1 system")
-        print("*************************")
 
         # print the menu
         self.main_menu() 
@@ -30,6 +29,7 @@ class menu:
     # The main menu is showd firstly when users open this system
     # This paert will provide 4 different opthins for users to login, sign up and exit.
     def main_menu(self):
+        print("*************************")
         print('Type "a" to login as a Registry Agent')
         print('Type "o" to login as a Traffic Officer')
         print('Type "s" to Sign Up') 
@@ -77,8 +77,10 @@ class menu:
                             sys.exit()
                         elif uid.lower()=="b":
                             self.main_menu()
+                            return
                         elif uid.lower()=="o":
-                            self.a_login()       
+                            self.a_login()
+                            return       
                         else:
                             print("Invalid option please enter again")
                     
@@ -90,8 +92,10 @@ class menu:
                         sys.exit()
                     elif choice.lower()=="b":
                         self.main_menu()
+                        return
                     elif choice.lower()=="o":
-                        self.a_login()       
+                        self.a_login() 
+                        return      
                     else:
                         print("Invalid option please try again")
     
@@ -121,8 +125,10 @@ class menu:
                             sys.exit()
                         elif choice.lower()=="b":
                             self.main_menu()
+                            return
                         elif choice.lower()=="o":
-                            self.o_login()       
+                            self.o_login()   
+                            return    
                         else:
                             print("Invalid option please try again")
                     
@@ -134,8 +140,10 @@ class menu:
                         sys.exit()
                     elif choice.lower()=="b":
                         self.a_menu()
+                        return
                     elif choice.lower()=="o":
-                        self.o_login()       
+                        self.o_login() 
+                        return      
                     else:
                         print("Invalid option please try again")
         
@@ -156,7 +164,7 @@ class menu:
         print("*************************")
         option = input("your option: ")
 
-        query = aq.agent_queries(self.cursor)
+        query = aq.agent_queries()
 
         if option == "1":
             baby_det = query.regex_newborn_details()
@@ -175,6 +183,9 @@ class menu:
                 elif result == "f":
                     print("Birth could not be registered, father does not exist. Would you like to add him?")
                     fdetails = query.regex_person_details("father", ffname, flname)
+                    #TODO DEBUG
+                    print("saving father: ")
+                    print(fdetails)
                     self.cursor.execute("INSERT INTO persons VALUES (?, ?, ?, ?, ?, ?)", (fdetails))
                 elif result == "u":
                     raise(Exception, "USER IS INVALID")
@@ -196,7 +207,7 @@ class menu:
                     self.cursor.execute("INSERT INTO persons VALUES (?, ?, ?, ?, ?, ?)", (p1details))
                 elif result == "2":
                     print("Birth could not be registered, the second person does not exist. ")
-                    p2details = query.regex_person_details("second person", p1fname, p1lname)
+                    p2details = query.regex_person_details("second person", p2fname, p2lname)
                     self.cursor.execute("INSERT INTO persons VALUES (?, ?, ?, ?, ?, ?)", (p2details))
                 elif result == "u":
                     raise(Exception, "USER IS INVALID")
@@ -299,7 +310,7 @@ class menu:
                 data = (uid,pwd,utype,fname,lname,city)
                 self.cursor.execute("SELECT * FROM persons where LOWER(fname)=? and LOWER(lname)=? COLLATE NOCASE;",(fname,lname))
                 if(not self.cursor.fetchall()):
-                    query=aq.agent_queries(self.cursor)
+                    query=aq.agent_queries()
                     userdetails=query.regex_person_details("your",fname,lname)
                     self.cursor.execute("INSERT INTO  persons VALUES (?,?,?,?,?,?);",userdetails)
                 self.cursor.execute("INSERT INTO  users VALUES (?,?,?,?,?,?);",data)

@@ -4,13 +4,15 @@ import dateutil.parser as date_parser
 
 class agent_queries:
 
-    # This is class constructor, it initalizes the class' instance variables
-    def __init__(self, cur):
+    #this method gets a unique registration number from the births table
+    def get_unique_birth_regno(self, cur):
         cur.execute("SELECT MAX(regno) FROM births;")
-        self.birth_regno = cur.fetchone()[0] + 1
-        cur.execute("SELECT MAX(regno) FROM registrations;")    
-        self.marriage_regno = cur.fetchone()[0] + 1
+        return cur.fetchone()[0] + 1
 
+    #this method gets a unqiue registration number from the marriages table
+    def get_unique_marriage_regno(self, cur):
+        cur.execute("SELECT MAX(regno) FROM marriages;")
+        return cur.fetchone()[0] + 1
 
     # Question 1.1 begins
 
@@ -34,7 +36,7 @@ class agent_queries:
         mother = self.get_person(cur, mfname, mlname)
         father = self.get_person(cur, ffname, flname)
         user = self.get_user(cur, uid)
-    
+
         if mother == None:
             return "m"
         elif father == None:
@@ -42,13 +44,13 @@ class agent_queries:
         elif user == None:
             return "u"
         else:
-            birth_vals = (self.birth_regno, fname, lname, datetime.date.today(), user["city"], gender, ffname, flname, mfname, mlname)
+            birth_reg_no = self.get_unique_birth_regno(cur)
+            birth_vals = (birth_reg_no, fname, lname, datetime.date.today(), user["city"], gender, ffname, flname, mfname, mlname)
             person_vals = (fname, lname, datetime.date.today(), user["city"], mother["address"], mother["phone"])
             # have to add the statement to persons first, 
             # since births has a foreign key constraint for the newborns first and last name
             cur.execute("INSERT INTO persons VALUES(?, ?, ?, ?, ?, ?);", person_vals)
             cur.execute("INSERT INTO births VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", birth_vals)
-            self.birth_regno += 1
             return True
     # Question 1.1 ends
 
@@ -78,7 +80,8 @@ class agent_queries:
         elif user == None:
             return "u"
         else:
-            marriage_vals = [self.marriage_regno, datetime.date.today(), user["city"], p1fname, p1lname, p2fname, p2lname]
+            marriage_reg_no = self.get_unique_marriage_regno(cur)
+            marriage_vals = (marriage_reg_no, datetime.date.today(), user["city"], p1fname, p1lname, p2fname, p2lname)
             cur.execute("INSERT INTO marriages VALUES (?, ?, ?, ?, ?, ?, ?);", marriage_vals)
             return True
     # Question 1.2 ends
@@ -110,6 +113,7 @@ class agent_queries:
                 new_date = datetime.date.today() + relativedelta(years=1)
                 new_date_string = datetime.datetime.strftime(new_date, format_string).replace(' 0', ' ')
             cur.execute("UPDATE registrations SET expiry = (?) WHERE regno = (?);", (new_date_string, regno))
+            print("Your vehicle registration expires on: " + new_date_string)
             return True
     # Question 1.3 ends
 
@@ -162,10 +166,14 @@ class agent_queries:
             address = input("Please enter the %s's address: " % type_of)
             phone = input("Please enter the %s's phone number: " % type_of)
             if (re.match("^[A-Za-z0-9_]*$", bplace)
-            and  re.match("^[A-Za-z0-9_]*$", address) and re.match("^[A-Za-z0-9_]*$", phone)):
-                regex_check = True
+            and  re.match("^[A-Za-z0-9_]*$", address)):
+                if re.match("^[0-9-]*$", phone):
+                    regex_check = True
+                else:
+                    print('You can only use numbers or the symbol " - " in the phone number, please try again')
+
             else:
-                print('You can only use letters, numbers or the symbol " _ ", please try again')
+                print('You can only use letters, numbers or the symbol " _ " in the birthplace and address, please try again')
         return [fname, lname, bdate, bplace, address, phone]
 
     # This method does a regex check on all the details that are inputted by the user in order 
@@ -402,9 +410,8 @@ class agent_queries:
             print('Transaction cancelled')
             return
 
-        cursor.execute("INSERT INTO payments VALUES (?, date('now'), ?);",
+        cursor.execute("INSERT INTO payments VALUES (?, datetime('now'), ?);",
                     (info['tno'], info['payment']))
-
         print('Payment recorded!')
 
 
@@ -454,8 +461,7 @@ class agent_queries:
             print('Error: incorrect payment format')
             return False
         elif int(payment) + ticket[1] > ticket[0]:
-            print('Payment too high! Current amount paid for this ticket: '
-                '$%d out of $%d', ticket[1], ticket[0])
+            print('Payment too high! Current amount paid for this ticket: $' + str(ticket[1]) +' out of $' + str(ticket[0]))
             return False
         else:
             info['payment'] = int(payment)
@@ -470,12 +476,13 @@ class agent_queries:
     # Users can view the 5 tickets informations which ordered from the latest to the oldest or every ticket informations
     def  get_driver_abstract(self, cursor):
         print("You are able to enter a first name and a last name to get a driver abstract.") 
-        fname=input("Please enter a first name:")
-        lname=input("Please enter a last name:")
+        fname=input("Please enter a first name: ")
+        lname=input("Please enter a last name: ")
         cursor.execute(" SELECT fname,lname FROM registrations  Where fname= ?  COLLATE NOCASE AND  lname= ? COLLATE NOCASE;",[(fname),(lname)])
         results = cursor.fetchall()
         if  len(results)==0 : 
-            t=input('No fname matched please enter "e" to go back to the agent menu or enter others to try again  :')
+            print("This person does not have any registrations.")
+            t=input('Please enter "e" to go back to the agent menu or enter others to try again: ')
             if t.lower() == "e":
                 return
             else:
@@ -525,6 +532,7 @@ class agent_queries:
                                 return
                             else :
                                 self.get_driver_abstract(cursor)
+                                return
                           
                     else:
                         # Show the top 5 tickets informations to users 
@@ -539,7 +547,7 @@ class agent_queries:
                         while True:
                             x=input('Enter "a" to view all tickets, or enter "e" will go back to the agent menu, or enter "t" to view another driver abstract:')
                             if x.lower()=="e":
-                                self.agent_menu
+                                return
                             elif x.lower()=="t":
                                 self.get_driver_abstract(cursor)
                             elif x.lower()=="a":
